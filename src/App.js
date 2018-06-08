@@ -6,6 +6,37 @@ import './App.css';
 // change every list item to an object that will then be rendered into a ListItem
 // this way you can actually access the object.unique identifier to delete
 
+class NewItemForm extends Component{
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      itemVal: 'name of list item',
+    };
+  }
+
+  textChange = (event) => {
+    this.setState({itemVal: event.target.value,});
+  } 
+
+  submitClick = () => {
+    var returnInfo = {
+      itemVal: this.state.itemVal,
+    }
+
+    this.props.handleSubmit(returnInfo);
+  }
+  render(){
+    return (
+      <div>
+        <input id="itemVal" type="text" value={this.state.itemVal} onChange={this.textChange} />
+        <label for="itemVal"> Enter name of list item </label>
+        <button onClick={this.submitClick}> Submit! </button>
+      </div>
+    );
+  }
+}
+
 function ListItem(props){
 
   var handleDeleteClick = () => props.deleteTask(props.listId);
@@ -52,17 +83,18 @@ class App extends Component {
     };
 
     this.idGen = this.idGen.bind(this);
-    this.listCheck = this.listCheck.bind(this);
+    //this.listCheck = this.listCheck.bind(this);
   }
 
   // each task is created with a particular key (random) such that it can be specified for deletion, edit, etc.
 
-  addTask = () => {
+  addTask = (submitName) => {
     let newListOfItems = this.state.listOfItems;
-    let tempName = "temporaryName";
-    let listId = this.idGen(tempName);
+    let name = submitName;
+    let listId = this.idGen(submitName);
     //console.log(listId);
-    newListOfItems[listId] = "temporary name" + listId; 
+    // change this line
+    newListOfItems[listId] = name;
     console.log(newListOfItems[listId]);
 
     //newListOfItems.push(<ListItem key={listId} listId = {listId} deleteTask={this.deleteTask}/>);
@@ -81,6 +113,15 @@ class App extends Component {
     this.setState({listOfItems: newListOfItems,});
   }
 
+  handleSubmit = (submitInfo) => {
+    this.setState({showDataEntryBox : !this.state.showDataEntryBox});
+    this.addTask(submitInfo.itemVal);
+  }
+
+  addTaskOnClick = () => {
+    this.setState({showDataEntryBox : !this.state.showDataEntryBox});
+  }
+
   // alter idGen to instead access the listOfItems and the listIds of each element as filter
 
 // a ListId is a: 
@@ -95,19 +136,20 @@ idGen(itemName) {
   }
 
 // this function consumes an id and returns the listItem's corresponding array index
-listCheck (id) {
-    var indexNeeded;
-    let arr = this.state.listOfItems.slice();
+// DEPRECATED FUNCTION, Main list no longer requires a function to check array index, or uses arrays
+// listCheck (id) {
+//     var indexNeeded;
+//     let arr = this.state.listOfItems.slice();
 
-    for(let i = 0; i < arr.length; i++){
-      if(arr[i].listId === id){
-        indexNeeded = i;
-      }
-    }
+//     for(let i = 0; i < arr.length; i++){
+//       if(arr[i].listId === id){
+//         indexNeeded = i;
+//       }
+//     }
 
-    return indexNeeded;
+//     return indexNeeded;
 
-  }
+//   }
 
 
   render() {
@@ -118,7 +160,8 @@ listCheck (id) {
           <h1 className="App-title">Welcome to React</h1>
         </header>
         <ListOfItems arr={this.state.listOfItems} deleteTask={this.deleteTask}/>
-        <button onClick={this.addTask}>Add a new task</button>
+        <button onClick={this.addTaskOnClick}>Add a new task</button>
+        {this.state.showDataEntryBox ? <NewItemForm handleSubmit={this.handleSubmit}/> : null}
       </div>
       
     );
